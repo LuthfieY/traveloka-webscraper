@@ -2,7 +2,7 @@ from datetime import datetime
 from process_data import to_date, currency_to_integer
 from google.cloud import datastore
 
-def extract_hotel_data(page_content, client):
+def extract_hotel_data(url, page_content, client):
     hotel_data = datastore.Entity(client.key("Hotel"))
     
     overview = page_content.find(
@@ -64,11 +64,12 @@ def extract_hotel_data(page_content, client):
     if image:
         hotel_data["image"] = image["src"]
     hotel_data["scraped_at"] = datetime.now()
-
+    hotel_data["url"] = url
+    client.put(hotel_data)
     return hotel_data
 
 
-def extract_and_export_review_data(page_content, client, hotel_data):
+def extract_review_data(page_content, client, hotel_data):
     reviews = page_content.find_all(
         "div",
         class_="css-1dbjc4n r-14lw9ot r-h1746q r-kdyh1x r-d045u9 r-18u37iz r-1fdih9r r-1udh08x r-d23pfw",
@@ -136,5 +137,5 @@ def extract_and_export_review_data(page_content, client, hotel_data):
             )
             review_data["reply_date"] = to_date(reply_date.text)
         review_data["scraped_at"] = datetime.now()
-
-        client.put(review_data)
+        if len(review_data['review_content']) <= 1500:
+            client.put(review_data)

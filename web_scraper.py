@@ -1,13 +1,14 @@
 import time
-from datetime import datetime
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def open_webpage(url):
-    driver = webdriver.Chrome()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--log-level=3')
+    
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get(url)
     return driver
 
@@ -111,5 +112,7 @@ def get_total_page(page_content):
         "div",
         class_="css-901oao css-bfa6kz r-1i6uqv8 r-t1w4ow r-cygvgh r-b88u0q r-1iukymi r-q4m81j",
     )
+    if(len(page_nums) == 0):
+        return 1
     total_page = page_nums[-1]
     return int(total_page.text)
