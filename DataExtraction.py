@@ -1,10 +1,9 @@
-from datetime import datetime
-from process_data import to_date, currency_to_integer
-from google.cloud import datastore
+from datetime import datetime, timezone
+from DatastoreUtils import to_date, currency_to_integer, put_entity, create_entity
 
 def extract_hotel_data(url, page_content, client):
-    hotel_data = datastore.Entity(client.key("Hotel"))
-    
+    hotel_data = create_entity(client, "Hotel")
+
     overview = page_content.find(
         "div", class_="css-1dbjc4n r-obd0qt r-18u37iz r-ml3lyg r-tskmnb"
     )
@@ -63,9 +62,10 @@ def extract_hotel_data(url, page_content, client):
     )
     if image:
         hotel_data["image"] = image["src"]
-    hotel_data["scraped_at"] = datetime.now()
+    hotel_data["scraped_at"] = datetime.now(timezone.utc)
     hotel_data["url"] = url
-    client.put(hotel_data)
+
+    put_entity(client, hotel_data)
     return hotel_data
 
 
@@ -75,7 +75,7 @@ def extract_review_data(page_content, client, hotel_data):
         class_="css-1dbjc4n r-14lw9ot r-h1746q r-kdyh1x r-d045u9 r-18u37iz r-1fdih9r r-1udh08x r-d23pfw",
     )
     for review in reviews:
-        review_data = datastore.Entity(client.key("Review"))
+        review_data = create_entity(client, "Review")
         left_bar = review.find("div", class_="css-1dbjc4n r-b83rso r-1ssbvtb")
         main_content = review.find(
             "div", class_="css-1dbjc4n r-1habvwh r-13awgt0 r-1ssbvtb"
@@ -136,6 +136,16 @@ def extract_review_data(page_content, client, hotel_data):
                 class_="css-901oao r-1ud240a r-t1w4ow r-1b43r93 r-b88u0q r-rjixqe r-fdjqy7",
             )
             review_data["reply_date"] = to_date(reply_date.text)
-        review_data["scraped_at"] = datetime.now()
-        if len(review_data['review_content']) <= 1500:
-            client.put(review_data)
+        review_data["scraped_at"] = datetime.now(timezone.utc)
+
+        put_entity(client, review_data)
+
+def get_total_page(page_content):
+    page_nums = page_content.find_all(
+        "div",
+        class_="css-901oao css-bfa6kz r-1i6uqv8 r-t1w4ow r-cygvgh r-b88u0q r-1iukymi r-q4m81j",
+    )
+    if len(page_nums) == 0:
+        return 1
+    total_page = page_nums[-1]
+    return int(total_page.text)

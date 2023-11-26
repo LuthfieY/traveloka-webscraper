@@ -1,29 +1,23 @@
 
 # Traveloka Hotel Webscraper
 
-A spaghetti code I made for my database class final project. It scraped data from traveloka hotel website and import it to google datastore.
+Webscraper yang mengambil data dari Traveloka Hotel kemudian menyimpannya pada Google Datastore.
+
+Program ini dibuat untuk memenuhi tugas akhir matakuliah Basis Data Semester 1 TRI 2023.
 
 
-## Environment Variables
+## Environment Variable
 
-To run this project, you will need to add the following environment variables to your .env file
+Untuk menjalankan proyek ini, tambahkan environtment variable berikut ke file .env 
 
-`URL`: URL of the website to scrape
-
-`CRED_PATH`: Path to datastore credentials file
+`CRED_PATH`: Path ke file kredensial datastore
 
 
-## Installation
+## Instalasi dan Menjalankan Program
 
 ```bash
-pip install beautifulsoup4
+pip install -r requirements.txt
 
-pip install python-dotenv
-
-pip install google-cloud-datastore
-
-pip install google-auth
-
-pip install selenium
+python main.py "URL"
 ```
     
